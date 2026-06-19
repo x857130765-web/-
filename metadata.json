@@ -1,0 +1,8 @@
+{
+  "name": "中日古代のメイク",
+  "description": "Create custom avatars through era selection and two-stage facial and outfit customization in this interactive dress-up experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
