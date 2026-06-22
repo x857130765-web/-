@@ -569,7 +569,7 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
         >
           {/* Scrolling Drawers of options */}
           <div 
-            className="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar z-10 scroll-smooth" 
+            className="flex-1 overflow-y-auto overflow-x-hidden pr-1 select-none custom-scrollbar z-10 scroll-smooth" 
             id="components-grid-container"
             style={
               activeTab === 'brows' ? { maxHeight: '396px', scrollBehavior: 'smooth' } :
