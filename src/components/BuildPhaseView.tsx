@@ -50,6 +50,7 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
   const currentTabs = phase === 'face_build' ? faceTabs : overallTabs;
   const [activeTab, setActiveTab] = useState<string>(initialTab || currentTabs[0]);
   const [showHintPage, setShowHintPage] = useState<boolean>(false);
+  const [showEndButton, setShowEndButton] = useState<boolean>(false);
 
   // States for button image fallbacks
   const [homeImgFailed, setHomeImgFailed] = useState<boolean>(false);
@@ -72,6 +73,19 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
   useEffect(() => {
     setActiveTab(initialTab || currentTabs[0]);
   }, [phase, initialTab]);
+
+  // Delayed timer for showing "おしまい" button in markings tab (3 seconds duration)
+  useEffect(() => {
+    if (phase === 'overall_build' && activeTab === 'markings') {
+      setShowEndButton(false);
+      const timer = setTimeout(() => {
+        setShowEndButton(true);
+      }, 3000);
+      return () => clearTimeout(timer);
+    } else {
+      setShowEndButton(false);
+    }
+  }, [phase, activeTab]);
 
   // Dynamic focus/zoom calculation for the face customizer step and full costume step
   const getDynamicPreviewTransform = () => {
@@ -507,10 +521,10 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
       {/* 3. RIGHT SIDE: DETAILED FOLDER DRESSING BOARD (Pink Cabinet Style) */}
       <div className="h-[97%] w-[55%] pr-[72px] mt-1 flex flex-col relative transition-all duration-300" id="folder-note-board">
         {/* Cabinet custom top-rim pink header panel */}
-        <div className={`h-[46px] rounded-t-2xl flex items-end relative z-10 select-none shadow ${
+        <div className={`h-[46px] rounded-t-2xl flex items-end relative z-10 select-none shadow justify-between px-1.5 ${
           phase === 'overall_build' 
-            ? 'justify-between px-1.5 bg-[#e3bc6a] border-t-4 border-x-4 border-[#ca9d54]' 
-            : 'justify-start px-4 space-x-2.5 bg-[#fca5a5] border-t-4 border-x-4 border-rose-300'
+            ? 'bg-[#e3bc6a] border-t-4 border-x-4 border-[#ca9d54]' 
+            : 'bg-[#fca5a5] border-t-4 border-x-4 border-rose-300'
         }`}>
           {currentTabs.map((tab) => {
             const isSelected = activeTab === tab;
@@ -527,7 +541,7 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
                       ? 'bg-[#daab45]/60 hover:bg-[#daab45]/80 text-[#543003] border-transparent translate-y-[7px] h-[33px]'
                       : 'bg-[#ffa6a6]/40 hover:bg-[#ffa6a6]/60 text-white border-transparent translate-y-[4px] h-[33px]'
                 }`}
-                style={phase === 'overall_build' ? { flex: 1, margin: '0 4px' } : { width: '84px' }}
+                style={{ flex: 1, margin: '0 4px' }}
               >
                 <div className="flex flex-col items-center justify-center">
                   {renderTabIcon(tab, isSelected)}
@@ -558,10 +572,10 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
             className="flex-1 overflow-y-auto pr-1 select-none custom-scrollbar z-10 scroll-smooth" 
             id="components-grid-container"
             style={
-              activeTab === 'brows' ? { maxHeight: '316px', scrollBehavior: 'smooth' } :
-              activeTab === 'hair' ? { maxHeight: '326px', scrollBehavior: 'smooth' } :
-              activeTab === 'clothing' ? { maxHeight: '410px', scrollBehavior: 'smooth' } :
-              activeTab === 'markings' ? { maxHeight: '326px', scrollBehavior: 'smooth' } : { scrollBehavior: 'smooth' }
+              activeTab === 'brows' ? { maxHeight: '396px', scrollBehavior: 'smooth' } :
+              activeTab === 'hair' ? { maxHeight: '406px', scrollBehavior: 'smooth' } :
+              activeTab === 'clothing' ? { maxHeight: '490px', scrollBehavior: 'smooth' } :
+              activeTab === 'markings' ? { maxHeight: '406px', scrollBehavior: 'smooth' } : { maxHeight: '396px', scrollBehavior: 'smooth' }
             }
           >
             {activeTab === 'hair' ? (
@@ -576,7 +590,7 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
                       key={item.id}
                       onClick={() => handleItemSelect(item.category, item.id, item)}
                       className={`relative p-1.5 cursor-pointer flex flex-col items-center justify-center bg-transparent select-none transition-all duration-200 ${
-                        isTall ? 'row-span-2 h-[230px]' : 'h-[108px]'
+                        isTall ? 'row-span-2 h-[268px]' : 'h-[128px]'
                       } ${
                         isSelected 
                           ? 'ring-2 ring-[#ea923b] scale-[1.03] shadow-md z-10'
@@ -608,7 +622,7 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
             ) : (
                 <div className={`grid p-1 w-full gap-2.5 items-start ${
                   activeTab === 'clothing' 
-                    ? 'grid-cols-3 gap-x-1 gap-y-[20px]' 
+                    ? 'grid-cols-3 gap-x-0 gap-y-[47px]' 
                     : 'grid-cols-4 gap-x-2.5 gap-y-2.5'
                 }`}>
                   {getItemsForActiveTab().map((item) => {
@@ -619,9 +633,9 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
                     
                     const optionHeightClass = 
                       isClothing 
-                        ? 'h-[190px]' 
+                        ? 'h-[210px]' 
                         : activeTab === 'brows'
-                          ? 'h-[105px]' 
+                          ? 'h-[75px]' 
                           : isMarking
                             ? 'h-[80px]' 
                             : 'h-[75px]';
@@ -673,9 +687,11 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
                           activeTab === 'clothing' 
                             ? 'scale-[1.25] -translate-y-[10px]' 
                             : isMarking
-                            ? 'scale-[0.55] -translate-y-0.5' 
+                            ? 'scale-[0.63] -translate-y-0.5' 
                             : activeTab === 'eyes'
                             ? 'scale-[0.822] translate-y-0'
+                            : activeTab === 'brows'
+                            ? 'scale-[1.07]'
                             : 'scale-[1.25]'
                         }`}>
                           {renderThumbnailSvg(item)}
@@ -850,32 +866,38 @@ export const BuildPhaseView: React.FC<BuildPhaseViewProps> = ({
       )}
 
       {/* SPECIAL COMPLETED MARKINGS PAGE: NEW LARGE SHINY DOWNLOAD BUTTON */}
-      {phase === 'overall_build' && activeTab === 'markings' && (
-        <div className="absolute bottom-[44px] right-[-2px] z-30 pointer-events-none">
-          <motion.button
-            onClick={handleNextStep}
-            className="pointer-events-auto cursor-pointer bg-none border-none focus:outline-none flex items-center justify-center transition-all scale-[0.85]"
-            whileHover={{ scale: 1.08 }}
-            whileTap={{ scale: 0.94 }}
-            id="btn-nav-step-end"
-            title="おしまい"
-          >
-            {btnEndFailed ? (
-              <div className="inset-0 flex items-center justify-center font-bold text-amber-900 bg-gradient-to-b from-[#fbe3b5] to-[#f4be6e] border-2 border-[#d6a54f] rounded-full shadow-lg text-sm px-6 py-2.5 font-serif pointer-events-none">
-                おしまい 🌸
-              </div>
-            ) : (
-              <img 
-                src="/resources/makeup/end_button.png" 
-                alt="おしまい" 
-                className="w-52 h-14 object-contain pointer-events-none hover:brightness-105 transition-all"
-                onError={() => setBtnEndFailed(true)}
-                referrerPolicy="no-referrer"
-              />
-            )}
-          </motion.button>
-        </div>
-      )}
+      <AnimatePresence>
+        {phase === 'overall_build' && activeTab === 'markings' && showEndButton && (
+          <div className="absolute bottom-[44px] right-[-2px] z-30 pointer-events-none">
+            <motion.button
+              onClick={handleNextStep}
+              className="pointer-events-auto cursor-pointer bg-none border-none focus:outline-none flex items-center justify-center transition-all scale-[0.85]"
+              initial={{ opacity: 0, scale: 0.7 }}
+              animate={{ opacity: 1, scale: 0.85 }}
+              exit={{ opacity: 0, scale: 0.7 }}
+              transition={{ duration: 0.4 }}
+              whileHover={{ scale: 0.92 }}
+              whileTap={{ scale: 0.8 }}
+              id="btn-nav-step-end"
+              title="おしまい"
+            >
+              {btnEndFailed ? (
+                <div className="inset-0 flex items-center justify-center font-bold text-amber-900 bg-gradient-to-b from-[#fbe3b5] to-[#f4be6e] border-2 border-[#d6a54f] rounded-full shadow-lg text-sm px-6 py-2.5 font-serif pointer-events-none">
+                  おしまい 🌸
+                </div>
+              ) : (
+                <img 
+                  src="/resources/makeup/end_button.png" 
+                  alt="おしまい" 
+                  className="w-52 h-14 object-contain pointer-events-none hover:brightness-105 transition-all"
+                  onError={() => setBtnEndFailed(true)}
+                  referrerPolicy="no-referrer"
+                />
+              )}
+            </motion.button>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* 5. FULL-SCREEN HINT OVERLAY */}
       <AnimatePresence>

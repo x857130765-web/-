@@ -140,106 +140,158 @@ export default function App() {
     setActiveBuildTab(undefined);
   };
 
+  const [dimensions, setDimensions] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 1080,
+    height: typeof window !== 'undefined' ? window.innerHeight : 720,
+  });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    // Force call immediately
+    handleResize();
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const targetWidth = 1080;
+  const targetHeight = 720;
+  
+  // Use slightly less padding on mobile to optimize screen area
+  const padding = dimensions.width < 640 ? 12 : 32;
+  const availableWidth = Math.max(200, dimensions.width - padding);
+  const availableHeight = Math.max(200, dimensions.height - padding);
+
+  let scale = Math.min(availableWidth / targetWidth, availableHeight / targetHeight);
+  // Cap upscale to 1.3 to avoid oversized containers
+  if (scale > 1) {
+    scale = Math.min(scale, 1.3);
+  }
+
   return (
-    <div className="min-h-screen bg-[#ece0c9] flex items-center justify-center p-4 overflow-x-hidden font-sans select-none antialiased">
+    <div className="min-h-screen bg-[#ece0c9] flex items-center justify-center p-2 sm:p-4 overflow-hidden font-sans select-none antialiased">
       {/* Background silk grain texture overlay */}
       <div className="fixed inset-0 pointer-events-none opacity-20 mix-blend-color-burn bg-[radial-gradient(#8f7253_1px,transparent_1px)] [background-size:20px_20px]" />
 
-      {/* Main Classical Cabinet Container representing the dress up game console */}
-      <motion.div 
-        className="w-full max-w-[1080px] aspect-[3/2] bg-[#f5ebd2] rounded-3xl overflow-hidden relative shadow-2xl"
+      {/* Responsive Viewport Wrapper that locks aspect ratio flow space precisely in the DOM */}
+      <div 
+        className="flex items-center justify-center overflow-hidden flex-shrink-0"
         style={{
-          boxShadow: '0 25px 60px -15px rgba(100, 75, 45, 0.45)'
+          width: `${targetWidth * scale}px`,
+          height: `${targetHeight * scale}px`,
+          transition: 'width 0.15s ease-out, height 0.15s ease-out',
         }}
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        id="classical-game-display-cabinet"
+        id="responsive-scaled-viewport"
       >
-        {/* Dynamic Phase Controller Switcher */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={phase}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.35, ease: 'easeInOut' }}
-            className="w-full h-full"
-          >
-            {phase === 'welcome' && (
-              <WelcomeView 
-                onStart={handleStartWelcome} 
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-              />
-            )}
+        {/* Main Classical Cabinet Container representing the dress up game console */}
+        <motion.div 
+          className="w-[1080px] h-[720px] bg-[#f5ebd2] rounded-3xl overflow-hidden relative shadow-2xl flex-shrink-0"
+          style={{
+            boxShadow: '0 25px 60px -15px rgba(100, 75, 45, 0.45)',
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+          }}
+          initial={{ opacity: 0, scale: scale * 0.98 }}
+          animate={{ opacity: 1, scale: scale }}
+          transition={{ duration: 0.4 }}
+          id="classical-game-display-cabinet"
+        >
+          {/* Dynamic Phase Controller Switcher */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={phase}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              className="w-full h-full"
+            >
+              {phase === 'welcome' && (
+                <WelcomeView 
+                  onStart={handleStartWelcome} 
+                  isMuted={isMuted}
+                  setIsMuted={setIsMuted}
+                />
+              )}
 
-            {phase === 'era_select' && (
-              <EraSelectView onSelectEra={handleSelectEra} onHome={handleGoHome} />
-            )}
+              {phase === 'era_select' && (
+                <EraSelectView onSelectEra={handleSelectEra} onHome={handleGoHome} />
+              )}
 
-            {phase === 'quiz' && (
-              <QuizView 
-                era={avatarState.era}
-                avatarState={avatarState}
-                onCorrectAnswer={handleQuizCorrect}
-                onPrev={handlePrevFromQuiz}
-                onHome={handleGoHome}
-              />
-            )}
+              {phase === 'quiz' && (
+                <QuizView 
+                  era={avatarState.era}
+                  avatarState={avatarState}
+                  onCorrectAnswer={handleQuizCorrect}
+                  onPrev={handlePrevFromQuiz}
+                  onHome={handleGoHome}
+                />
+              )}
 
-            {phase === 'face_build' && (
-              <BuildPhaseView 
-                era={avatarState.era}
-                phase="face_build"
-                currentState={avatarState}
-                onStateChange={setAvatarState}
-                onNext={handleNextFromFace}
-                onPrev={handlePrevFromFace}
-                onHome={handleGoHome}
-                initialTab={activeBuildTab}
-                onExitToSelection={handleRestart}
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-              />
-            )}
+              {phase === 'face_build' && (
+                <BuildPhaseView 
+                  era={avatarState.era}
+                  phase="face_build"
+                  currentState={avatarState}
+                  onStateChange={setAvatarState}
+                  onNext={handleNextFromFace}
+                  onPrev={handlePrevFromFace}
+                  onHome={handleGoHome}
+                  initialTab={activeBuildTab}
+                  onExitToSelection={handleRestart}
+                  isMuted={isMuted}
+                  setIsMuted={setIsMuted}
+                />
+              )}
 
-            {phase === 'overall_build' && (
-              <BuildPhaseView 
-                era={avatarState.era}
-                phase="overall_build"
-                currentState={avatarState}
-                onStateChange={setAvatarState}
-                onNext={handleNextFromOverall}
-                onPrev={handlePrevFromOverall}
-                onHome={handleGoHome}
-                initialTab={activeBuildTab}
-                onExitToSelection={handleRestart}
-                isMuted={isMuted}
-                setIsMuted={setIsMuted}
-              />
-            )}
+              {phase === 'overall_build' && (
+                <BuildPhaseView 
+                  era={avatarState.era}
+                  phase="overall_build"
+                  currentState={avatarState}
+                  onStateChange={setAvatarState}
+                  onNext={handleNextFromOverall}
+                  onPrev={handlePrevFromOverall}
+                  onHome={handleGoHome}
+                  initialTab={activeBuildTab}
+                  onExitToSelection={handleRestart}
+                  isMuted={isMuted}
+                  setIsMuted={setIsMuted}
+                />
+              )}
 
-            {phase === 'display' && (
-              <FinalDisplayView 
-                currentState={avatarState}
-                onHome={handleGoHome}
-                onRestart={handleBackToStep2Markings}
-              />
-            )}
-          </motion.div>
-        </AnimatePresence>
+              {phase === 'display' && (
+                <FinalDisplayView 
+                  currentState={avatarState}
+                  onHome={handleGoHome}
+                  onRestart={handleBackToStep2Markings}
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Global Background Music Outchain Song Player */}
       <audio
         id="global-bg-music"
         src="https://music.163.com/song/media/outer/url?id=1849304699.mp3"
         loop
-        autoPlay
         style={{ display: 'none', position: 'absolute', width: 0, height: 0, opacity: 0 }}
       />
+      {!isMuted && (
+        <iframe
+          id="global-bg-music-iframe"
+          title="NetEase Outchain BGM"
+          src="https://music.163.com/outchain/player?type=2&id=1849304699&auto=1&height=66"
+          style={{ display: 'none', position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
+        />
+      )}
     </div>
   );
 }
