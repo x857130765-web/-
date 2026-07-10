@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { EraType, AvatarState } from '../types';
 
@@ -13,6 +13,7 @@ interface QuizViewProps {
   onCorrectAnswer: () => void;
   onPrev: () => void;
   onHome: () => void;
+  isMuted: boolean;
 }
 
 interface TriviaQuestion {
@@ -56,12 +57,16 @@ const TRIVIA_QUESTIONS: Record<EraType, TriviaQuestion> = {
 };
 
 
-export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev, onHome }) => {
+export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev, onHome, isMuted }) => {
   const [bgError, setBgError] = useState<boolean>(false);
   const quiz = TRIVIA_QUESTIONS[era] || TRIVIA_QUESTIONS['tang'];
   
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState<boolean>(false);
+
+  // Audio refs for correct and incorrect sounds
+  const rightAudioRef = useRef<HTMLAudioElement | null>(null);
+  const errorAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Home and Close buttons error states
   const [homeBtnError, setHomeBtnError] = useState<boolean>(false);
@@ -75,6 +80,20 @@ export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev
   const handleSelectOption = (index: number) => {
     setSelectedIndex(index);
     setIsAnswered(true);
+
+    if (!isMuted) {
+      if (index === quiz.correctIndex) {
+        if (rightAudioRef.current) {
+          rightAudioRef.current.currentTime = 0;
+          rightAudioRef.current.play().catch(e => console.log("Failed to play right_music:", e));
+        }
+      } else {
+        if (errorAudioRef.current) {
+          errorAudioRef.current.currentTime = 0;
+          errorAudioRef.current.play().catch(e => console.log("Failed to play error_music:", e));
+        }
+      }
+    }
   };
 
   const isCurrentCorrect = selectedIndex !== null && selectedIndex === quiz.correctIndex;
@@ -217,7 +236,7 @@ export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev
                   key={index}
                   disabled={isAnswered}
                   onClick={() => handleSelectOption(index)}
-                  className={`flex-1 h-[54px] rounded-[22px] border-[4px] px-6 flex items-center justify-center font-black text-xl transition-all font-serif shadow-sm ${optionStyle}`}
+                  className={`quiz-option-button flex-1 h-[54px] rounded-[22px] border-[4px] px-6 flex items-center justify-center font-black text-xl transition-all font-serif shadow-sm ${optionStyle}`}
                 >
                   <span>{option}</span>
                   {iconElement}
@@ -245,6 +264,10 @@ export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev
           />
         </motion.button>
       )}
+
+      {/* Hidden preloaded audios for right and wrong answers */}
+      <audio ref={rightAudioRef} src="/resources/right_music.m4a" preload="auto" style={{ display: 'none' }} />
+      <audio ref={errorAudioRef} src="/resources/error_music.m4a" preload="auto" style={{ display: 'none' }} />
     </div>
   );
 };

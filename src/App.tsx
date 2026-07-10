@@ -65,6 +65,43 @@ export default function App() {
     }
   }, [isMuted]);
 
+  // Global click sound effect controller
+  useEffect(() => {
+    const playClickSound = (e: MouseEvent) => {
+      if (isMuted) return;
+      
+      const target = e.target as HTMLElement | null;
+      if (!target) return;
+
+      // Skip standard click SFX for quiz answer options, since they play their own special sounds
+      if (target.closest('.quiz-option-button')) {
+        return;
+      }
+      
+      const isClickable = 
+        target.closest('button') || 
+        target.closest('[role="button"]') || 
+        target.closest('a') ||
+        target.closest('.cursor-pointer') ||
+        target.classList.contains('cursor-pointer');
+        
+      if (isClickable) {
+        const sfxAudio = document.getElementById('click-sound-sfx') as HTMLAudioElement;
+        if (sfxAudio) {
+          sfxAudio.currentTime = 0;
+          sfxAudio.play().catch((err) => {
+            console.log("SFX playback failed:", err);
+          });
+        }
+      }
+    };
+    
+    window.addEventListener('click', playClickSound, { capture: true });
+    return () => {
+      window.removeEventListener('click', playClickSound, { capture: true });
+    };
+  }, [isMuted]);
+
   // Transition: Welcome -> Era Select
   const handleStartWelcome = () => {
     setPhase('era_select');
@@ -229,6 +266,7 @@ export default function App() {
                   onCorrectAnswer={handleQuizCorrect}
                   onPrev={handlePrevFromQuiz}
                   onHome={handleGoHome}
+                  isMuted={isMuted}
                 />
               )}
 
@@ -280,18 +318,18 @@ export default function App() {
       {/* Global Background Music Outchain Song Player */}
       <audio
         id="global-bg-music"
-        src="https://music.163.com/song/media/outer/url?id=1849304699.mp3"
+        src="/resources/backmusic.m4a"
         loop
+        preload="auto"
         style={{ display: 'none', position: 'absolute', width: 0, height: 0, opacity: 0 }}
       />
-      {!isMuted && (
-        <iframe
-          id="global-bg-music-iframe"
-          title="NetEase Outchain BGM"
-          src="https://music.163.com/outchain/player?type=2&id=1849304699&auto=1&height=66"
-          style={{ display: 'none', position: 'absolute', width: 0, height: 0, opacity: 0, pointerEvents: 'none' }}
-        />
-      )}
+      {/* Preloaded Click SFX Audio */}
+      <audio
+        id="click-sound-sfx"
+        src="/resources/click_music.m4a"
+        preload="auto"
+        style={{ display: 'none', position: 'absolute', width: 0, height: 0, opacity: 0 }}
+      />
     </div>
   );
 }
