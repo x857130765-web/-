@@ -81,17 +81,15 @@ export const QuizView: React.FC<QuizViewProps> = ({ era, onCorrectAnswer, onPrev
     setSelectedIndex(index);
     setIsAnswered(true);
 
-    if (!isMuted) {
-      if (index === quiz.correctIndex) {
-        if (rightAudioRef.current) {
-          rightAudioRef.current.currentTime = 0;
-          rightAudioRef.current.play().catch(e => console.log("Failed to play right_music:", e));
-        }
-      } else {
-        if (errorAudioRef.current) {
-          errorAudioRef.current.currentTime = 0;
-          errorAudioRef.current.play().catch(e => console.log("Failed to play error_music:", e));
-        }
+    if (index === quiz.correctIndex) {
+      if (rightAudioRef.current) {
+        rightAudioRef.current.currentTime = 0;
+        rightAudioRef.current.play().catch(e => console.log("Failed to play right_music:", e));
+      }
+    } else {
+      if (errorAudioRef.current) {
+        errorAudioRef.current.currentTime = 0;
+        errorAudioRef.current.play().catch(e => console.log("Failed to play error_music:", e));
       }
     }
   };

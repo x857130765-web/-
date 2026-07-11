@@ -65,11 +65,9 @@ export default function App() {
     }
   }, [isMuted]);
 
-  // Global click sound effect controller
+  // Global click sound effect controller - always remains enabled
   useEffect(() => {
     const playClickSound = (e: MouseEvent) => {
-      if (isMuted) return;
-      
       const target = e.target as HTMLElement | null;
       if (!target) return;
 
@@ -100,7 +98,7 @@ export default function App() {
     return () => {
       window.removeEventListener('click', playClickSound, { capture: true });
     };
-  }, [isMuted]);
+  }, []);
 
   // Transition: Welcome -> Era Select
   const handleStartWelcome = () => {

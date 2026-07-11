@@ -621,7 +621,7 @@ export const FinalDisplayView: React.FC<FinalDisplayViewProps> = ({
             textShadow: '3px 3px 0px #fff, -3px -3px 0px #fff, 3px -3px 0px #fff, -3px 3px 0px #fff, 3px 4px 0px rgba(190,50,50,0.18)'
           }}
         >
-          背景画像をえらんね！
+          背景画像を選んでね
         </h2>
       </div>
 
