@@ -160,6 +160,23 @@ export const EYES_ASSETS: DressUpItem[] = [
       />
     ),
   },
+  {
+    id: 'eyes_eye4',
+    name: '魅影醉霞',
+    description: '华丽魅惑的国风眼妆 (eye4.png)',
+    category: 'eyes',
+    imagePath: '/resources/makeup/eye/eye4.png',
+    visualSvg: (props?: SVGItemProps) => (
+      <image
+        href={(props && props.isThumbnail) ? "/resources/makeup/eye/eye4.png" : "/resources/makeup/eye/eye4-1.png"}
+        x="30.85"
+        y={(props && props.isThumbnail) ? "63.6" : "52.6"}
+        width="58.3"
+        height="19.8"
+        referrerPolicy="no-referrer"
+      />
+    ),
+  },
 ];
 
 export const LIPS_ASSETS: DressUpItem[] = [
